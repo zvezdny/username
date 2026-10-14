@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Username Picker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;800&family=Newsreader:ital@1&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f0f7;--surface:#fff;--text:#1d1b2e;--muted:#6b6880;--line:#dcd8ea;--accent:#5b4bd6;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#15132a;--surface:#1f1c3a;--text:#ece9fa;--muted:#9a96b8;--line:#332f58;--accent:#9d90ff}}
+:root[data-theme="dark"]{--bg:#15132a;--surface:#1f1c3a;--text:#ece9fa;--muted:#9a96b8;--line:#332f58;--accent:#9d90ff}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.5 "Bricolage Grotesque",system-ui,sans-serif;min-height:100vh}
+main{max-width:720px;margin:0 auto;padding:28px 20px 60px}
+h1{font-size:1.1rem;margin:0 0 20px;font-weight:500;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:22px}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--text);padding:7px 14px;border-radius:999px;font:inherit;font-size:.9rem;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--c,var(--accent));border-color:var(--c,var(--accent));color:#fff}
+.chip:focus-visible,button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.stage{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:36px 24px;text-align:center;border-top:6px solid var(--c,var(--accent))}
+.name{font-size:clamp(2.4rem,11vw,4.6rem);font-weight:800;letter-spacing:-.02em;line-height:1.05;margin:0;word-break:break-word}
+.meaning{font-family:"Newsreader",Georgia,serif;font-style:italic;font-size:1.25rem;color:var(--muted);margin:10px 0 4px;min-height:1.8em}
+.cat{font-size:.85rem;color:var(--c,var(--accent));font-weight:500;min-height:1.4em}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+button.act{font:inherit;font-weight:500;padding:11px 22px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--text);cursor:pointer}
+button.act.main{background:var(--accent);border-color:var(--accent);color:#fff}
+:root:not([data-theme="light"]) button.act.main{color:#15132a}
+.hint{color:var(--muted);font-size:.8rem;margin-top:12px}
+h2{font-size:1rem;margin:36px 0 10px;font-weight:800}
+.saved{display:flex;flex-wrap:wrap;gap:8px}
+.saved span{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:5px 6px 5px 12px;display:inline-flex;align-items:center;gap:6px}
+.saved button{border:0;background:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:0 6px}
+.empty{color:var(--muted);font-size:.9rem}
+.group{margin-top:18px}
+.group h3{font-size:.95rem;margin:0 0 8px;color:var(--c)}
+.names{display:flex;flex-wrap:wrap;gap:6px}
+.names button{font:inherit;font-size:.9rem;border:1px solid var(--line);background:var(--surface);color:var(--text);border-radius:8px;padding:4px 11px;cursor:pointer}
+.names button:hover{border-color:var(--c)}
+.names button.on{background:var(--c);color:#fff;border-color:var(--c)}
+@media (prefers-reduced-motion:no-preference){.name.pop{animation:pop .25s ease-out}@keyframes pop{from{opacity:.2;transform:translateY(8px)}to{opacity:1;transform:none}}}
+</style>
+</head>
+<body>
+<main>
+<h1>Username picker</h1>
+<div class="chips" id="chips" role="group" aria-label="Category"></div>
+<section class="stage" id="stage" aria-live="polite">
+  <p class="name" id="name">Roll one</p>
+  <p class="meaning" id="meaning">Pick a category, then press the button.</p>
+  <p class="cat" id="cat"></p>
+  <div class="actions">
+    <button class="act main" id="roll">Roll a name</button>
+    <button class="act" id="save">Save</button>
+    <button class="act" id="copy">Copy</button>
+  </div>
+  <p class="hint">Space also rolls.</p>
+</section>
+<h2>Saved</h2>
+<div class="saved" id="saved"></div>
+<h2>All names</h2>
+<div id="all"></div>
+</main>
+<script>
+const DATA={
+"Slavic":{c:"#c2410c",n:[["Zvezdny","starry"],["Zarnitsa","heat lightning"],["Polynya","ice-hole in a frozen river"],["Vihr","whirlwind"],["Groza","thunderstorm"],["Sumerki","twilight"],["Beskrayny","endless, boundless"],["Ognivo","fire-striker, an old flint tool"],["Yavor","a type of maple, also an old Slavic name"],["Tishina","silence"],["Prizrak","ghost, specter"],["Metel","blizzard"],["Zarya","dawn"],["Rassvet","daybreak"],["Tuman","fog"],["Burya","storm"],["Pepel","ash"],["Iskra","spark"],["Bezdna","abyss"],["Mgla","haze, mist"],["Stuzha","bitter frost"],["Zatmenie","eclipse"],["Leshy","forest spirit of Slavic folklore"],["Vorona","crow"],["Kholod","cold"]]},
+"Japanese":{c:"#be185d",n:[["Kagerou","heat haze, shimmer"],["Yami","darkness"],["Ranka","chaotic flower"],["Shirogane","silver, platinum"],["Kuroi Tsuki","black moon"],["Kurotsuki","black moon, short form"],["Yozora","night sky"],["Hikari","light"],["Ibara","thorn"],["Tsukikage","moonlight, moon shadow"],["Akatsuki","the hour before dawn"],["Yoake","daybreak"],["Kasumi","mist, haze"],["Shigure","late-autumn drizzle"],["Kogarashi","cold wind of early winter"],["Hoshizora","starry sky"],["Hotaru","firefly"],["Kurenai","deep crimson"],["Setsuna","a fleeting instant"],["Utakata","foam, a fleeting bubble"],["Tasogare","twilight"],["Fubuki","snowstorm"],["Yuugure","dusk"]]},
+"Norse":{c:"#0369a1",n:[["Fjordung","old Norse land division"],["Ulfheim","wolf-home"],["Myrkr","darkness, Old Norse"],["Vindsval","cold wind"],["Draugr","undead spirit"],["Skuggi","shadow, Icelandic"],["Hrafn","raven"],["Skoll","the wolf who chases the sun"],["Vargr","wolf, outlaw"],["Nott","night, also the goddess of night"],["Niflheim","realm of mist and ice"],["Myrkvidr","dark wood"],["Huginn","thought, one of Odin's ravens"],["Muninn","memory, one of Odin's ravens"],["Ginnungagap","the primordial void"],["Svartr","black"],["Eldr","fire"],["Skald","Norse court poet"]]},
+"Latin":{c:"#047857",n:[["Umbra","shadow"],["Nox","night"],["Ferrum","iron"],["Lacuna","gap, void"],["Occulta","hidden"],["Aurum","gold"],["Vesper","evening star"],["Tenebrae","darkness, shadows"],["Lux","light"],["Caelum","sky, heavens"],["Cinis","ash"],["Ignis","fire"],["Ventus","wind"],["Corvus","crow, raven"],["Nebula","mist, cloud"],["Crepusculum","twilight"],["Argentum","silver"],["Fulgur","lightning"],["Silentium","silence"]]},
+"Invented":{c:"#7c3aed",n:[["Kyrenth",""],["Voidrenn",""],["Threnody","a lament or song of mourning (a real word)"],["Ashveil",""],["Nyxari",""],["Corvent",""],["Ildris",""],["Velkyr",""],["Kaelthorn",""],["Nyxen",""],["Ravnel",""],["Veyra",""],["Thornvale",""],["Solvaine",""],["Eldrith",""],["Morvane",""],["Draevyn",""],["Velmora",""],["Orrith",""],["Syrath",""],["Vaelun",""],["Nythra",""],["Ashgrave",""],["Hollowen",""],["Zyrith",""]]}
+};
+const cats=Object.keys(DATA);let sel="All",cur=null,saved=[];
+const $=id=>document.getElementById(id);
+try{saved=JSON.parse(localStorage.getItem("saved-usernames")||"[]")}catch(e){}
+function persist(){try{localStorage.setItem("saved-usernames",JSON.stringify(saved))}catch(e){}}
+function pool(){return cats.flatMap(k=>DATA[k].n.map(([n,m])=>({n,m,k}))).filter(x=>sel==="All"||x.k===sel)}
+function show(x){
+  cur=x;const c=DATA[x.k].c;$("stage").style.setProperty("--c",c);
+  const el=$("name");el.textContent=x.n;el.classList.remove("pop");void el.offsetWidth;el.classList.add("pop");
+  $("meaning").textContent=x.m||"No set meaning, just the sound";
+  $("cat").textContent=x.k;renderAll();
+}
+function roll(){const p=pool();let x;do{x=p[Math.floor(Math.random()*p.length)]}while(p.length>1&&cur&&x.n===cur.n);show(x)}
+function renderChips(){
+  $("chips").innerHTML="";
+  ["All",...cats].forEach(k=>{
+    const b=document.createElement("button");b.className="chip";b.textContent=k;
+    b.setAttribute("aria-pressed",k===sel);if(k!=="All")b.style.setProperty("--c",DATA[k].c);
+    b.onclick=()=>{sel=k;renderChips();roll()};$("chips").appendChild(b);
+  });
+}
+function renderSaved(){
+  const box=$("saved");box.innerHTML="";
+  if(!saved.length){box.innerHTML='<span class="empty" style="border:0;background:none;padding:0">Nothing saved yet.</span>';return}
+  saved.forEach(n=>{
+    const s=document.createElement("span");s.textContent=n;
+    const r=document.createElement("button");r.textContent="×";r.setAttribute("aria-label","Remove "+n);
+    r.onclick=()=>{saved=saved.filter(v=>v!==n);persist();renderSaved()};
+    s.appendChild(r);box.appendChild(s);
+  });
+}
+function renderAll(){
+  const box=$("all");box.innerHTML="";
+  cats.forEach(k=>{
+    const g=document.createElement("div");g.className="group";g.style.setProperty("--c",DATA[k].c);
+    g.innerHTML="<h3>"+k+"</h3>";const w=document.createElement("div");w.className="names";
+    DATA[k].n.forEach(([n,m])=>{
+      const b=document.createElement("button");b.textContent=n;if(cur&&cur.n===n)b.className="on";
+      b.onclick=()=>show({n,m,k});w.appendChild(b);
+    });
+    g.appendChild(w);box.appendChild(g);
+  });
+}
+async function flash(id,t,orig){const b=$(id);b.textContent=t;setTimeout(()=>b.textContent=orig,1200)}
+$("roll").onclick=roll;
+$("save").onclick=()=>{if(!cur)return;if(!saved.includes(cur.n)){saved.push(cur.n);persist();renderSaved()}flash("save","Saved","Save")};
+$("copy").onclick=async()=>{
+  if(!cur)return;
+  try{await navigator.clipboard.writeText(cur.n);flash("copy","Copied","Copy")}
+  catch(e){const t=document.createElement("textarea");t.value=cur.n;document.body.appendChild(t);t.select();try{document.execCommand("copy");flash("copy","Copied","Copy")}catch(_){flash("copy","Copy failed","Copy")}t.remove()}
+};
+document.addEventListener("keydown",e=>{if(e.code==="Space"&&!["BUTTON","INPUT"].includes(document.activeElement.tagName)){e.preventDefault();roll()}});
+renderChips();renderSaved();renderAll();
+</script>
+</body>
+</html>
